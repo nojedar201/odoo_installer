@@ -1,0 +1,51 @@
+version: '2'
+
+services:
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - conf:/etc/nginx/conf.d
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - odoo
+
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    environment:
+      - DEFAULT_EMAIL={{ email_ssl }}
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - certs:/etc/nginx/certs:rw
+      - acme:/etc/acme.sh
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      -  odoo
+
+volumes:
+  conf:
+    name: nginx_conf
+  vhost:
+    name: nginx_vhost
+  html:
+    name: nginx_html
+  certs:
+    name: nginx_certs
+  acme:
+    name: nginx_acme
+
+networks:
+   odoo:
+      driver: bridge
+      name: odoo
+      driver_opts:
+        encrypted: 1

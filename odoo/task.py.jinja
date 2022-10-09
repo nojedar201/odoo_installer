@@ -1,0 +1,57 @@
+import docker
+import hashlib
+import os
+import shutil
+from pathlib import Path
+from argparse import ArgumentParser
+
+PROJECT_ROOT = Path(__file__).parent.absolute()
+
+def move_file_to_volume(volume_nginx_vhost, filename_origin, filename_dest, symlink_name):
+    path_origin = os.path.join(PROJECT_ROOT, filename_origin)
+    path_symlink = os.path.join(PROJECT_ROOT, f"{symlink_name}.conf")
+    for volumen in volume_nginx_vhost:
+        path_dest = os.path.join(volumen.get("Source"), filename_dest)
+        if os.path.exists(path_origin):
+            shutil.copy(path_origin, path_dest)
+        if os.path.exists(path_symlink):
+            os.remove(path_symlink)
+        if os.path.exists(path_dest):
+            os.symlink(path_dest, path_symlink)
+        
+
+if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser.add_argument(
+        '--container_name',
+        help='Nombre de Instancia Docker de Nginx'
+    )
+    args = parser.parse_args()
+    if not args.container_name:
+        exit("Por favor ingrese un el nombre de la instancia")
+    client = docker.DockerClient(base_url='unix://var/run/docker.sock')
+    containers = client.containers.list()
+    try:
+        nginx_container = client.containers.get("nginx-proxy")
+        volumes_nginx = nginx_container.attrs.get("Mounts", [])
+        volume_nginx_vhost = list(filter(lambda x: x.get("Name", "") == "nginx_vhost", volumes_nginx))
+        containers_odoo = filter(lambda x: x.name.startswith(f"{args.container_name}-odoo"), containers)
+        for container in containers_odoo:
+            virtual_paths = list(filter(lambda x: x.startswith("VIRTUAL_PATH"), container.attrs.get("Config", {}).get("Env", [])))
+            virtual_hosts = filter(lambda x: x.startswith("VIRTUAL_HOST"), container.attrs.get("Config", {}).get("Env", []))
+            for virtual_host in virtual_hosts:
+                domains = virtual_host.replace("VIRTUAL_HOST=", "")
+                # iterar por cada dominio separado por coma
+                for domain in domains.split(","):
+                    file_name = domain
+                    move_file_to_volume(volume_nginx_vhost, domains, file_name, domain)
+                    for virtual_path in virtual_paths:
+                        virtual_path_val = virtual_path.replace("VIRTUAL_PATH=", "")
+                        if virtual_path_val != "/":
+                            virtual_path_hash = hashlib.sha1(virtual_path_val.encode()).hexdigest()
+                            # https://github.com/nginx-proxy/nginx-proxy#per-virtual_path-location-configuration
+                            file_name = f"{domain}_{virtual_path_hash}_location"
+                            symlink_name = f"{domain}_{virtual_path_val.replace('/', '')}"
+                            move_file_to_volume(volume_nginx_vhost, f"{domains}_location", file_name, symlink_name)
+    except docker.errors.NotFound as ex:
+        exit("Contenedor Nginx no encontrado")

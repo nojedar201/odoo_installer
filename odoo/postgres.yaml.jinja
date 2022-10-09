@@ -1,0 +1,29 @@
+version: "2.4"
+
+services:
+  db:
+    image: ghcr.io/tecnativa/postgres-autoconf:{{ postgres_version }}-alpine
+    container_name: postgres-{{ postgres_version }}
+    shm_size: 4gb
+    env_file:
+      - .docker/db-creation.env
+    environment:
+      POSTGRES_DB: odoo
+      POSTGRES_USER: odoo
+      {{ pg_tune_conf }}
+
+    volumes:
+      - db:/var/lib/postgresql/data:z
+    networks:
+      - odoo
+    restart: unless-stopped
+
+networks:
+  odoo:
+    driver: bridge
+    name: odoo
+    driver_opts:
+      encrypted: 1
+
+volumes:
+  db:

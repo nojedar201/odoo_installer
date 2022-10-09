@@ -1,0 +1,7 @@
+*.pyc
+*.swp
+.idea
+*.pydevproject
+*.eclipse.core.resources.prefs
+*.py~
+*.html~

@@ -1,0 +1,55 @@
+version: "2.4"
+
+services:
+  odoo:
+    image: {{ image_url }}
+    restart: unless-stopped
+    env_file:
+      - .docker/odoo.env
+      - .docker/db-access.env
+    environment:
+      DB_FILTER: "^{{ project_name }}"
+      DOODBA_ENVIRONMENT: "${DOODBA_ENVIRONMENT-prod}"
+      INITIAL_LANG: "{{ odoo_initial_lang }}"
+      LETSENCRYPT_HOST: {{ domain }}
+      VIRTUAL_HOST: {{ domain }}
+      VIRTUAL_PORT: {{ odoo_port }}
+      VIRTUAL_PATH: /
+    volumes:
+      - filestore:/var/lib/odoo
+    depends_on:
+      - db
+    networks:
+      - odoo
+
+  odoo-chat:
+    image: {{ image_url }}
+    restart: unless-stopped
+    env_file:
+      - .docker/odoo.env
+      - .docker/db-access.env
+    environment:
+      DB_FILTER: "^{{ project_name }}"
+      DOODBA_ENVIRONMENT: "${DOODBA_ENVIRONMENT-prod}"
+      INITIAL_LANG: "{{ odoo_initial_lang }}"
+      LETSENCRYPT_HOST: {{ domain }}
+      VIRTUAL_HOST: {{ domain }}
+      VIRTUAL_PORT: {{ odoo_port_longpolling }}
+      VIRTUAL_PATH: /longpolling
+      MAX_CRON_THREADS: 0
+    volumes:
+      - filestore:/var/lib/odoo
+    depends_on:
+      - db
+    networks:
+      - odoo
+
+networks:
+  odoo:
+    driver: bridge
+    name: odoo
+    driver_opts:
+      encrypted: 1
+
+volumes:
+  filestore:
