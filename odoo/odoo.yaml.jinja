@@ -17,8 +17,10 @@ services:
       VIRTUAL_PATH: /
     volumes:
       - filestore:/var/lib/odoo
+    {% if tipo_servidor_postgres == 'install' -%}
     depends_on:
       - db
+    {%- endif %}
     networks:
       - odoo
 
@@ -39,8 +41,10 @@ services:
       MAX_CRON_THREADS: 0
     volumes:
       - filestore:/var/lib/odoo
+    {% if tipo_servidor_postgres == 'install' -%}
     depends_on:
       - db
+    {%- endif %}
     networks:
       - odoo
 

@@ -26,8 +26,24 @@ image_url:
     default: "registry.gitlab.com/loo-erp/odoo:12.0-latest"
     help: Cual es la imagen a usar?
 
+tipo_servidor_postgres:
+    default: "install"
+    help: >-
+        Quiere instalar Postgres o usar uno ya existente?
+    choices:
+        "Instalar Postgres como Contenedor": "install"
+        "Usar Servidor Existente": "custom"
+
+pg_host:
+    when: "{{ tipo_servidor_postgres == 'custom' }}"
+    type: str
+    default: "db"
+    help: >-
+        URL o IP para conectarse a postgres
+
 postgres_version:
   default: "14"
+  when: &install_db "{{ tipo_servidor_postgres == 'install' }}"
   help: >-
     Which PostgreSQL version do you want to deploy?
   choices:
@@ -40,6 +56,7 @@ postgres_version:
     "14": "14"
 
 pg_tune_conf:
+    when: *install_db
     type: str
     multiline: true
     default: |
@@ -58,7 +75,17 @@ pg_tune_conf:
                 max_wal_size = 8GB
                 max_locks_per_transaction = 200
     help: Configuracion de PG Tune?
-    
+
+pg_port:
+    type: int
+    default: 5432
+    help: Puerto de Postgres?
+
+pg_user:
+    type: str
+    default: "odoo"
+    help: Usuario de Postgres?
+
 pg_password:
     secret: true
     type: str
@@ -82,7 +109,7 @@ odoo_proxy_mode:
 odoo_port:
     default: 8069
     type: int
-    help: Cual es el Puerto a usar?
+    help: Puerto a usar(Odoo)?
 
 odoo_port_longpolling:
     default: 8072

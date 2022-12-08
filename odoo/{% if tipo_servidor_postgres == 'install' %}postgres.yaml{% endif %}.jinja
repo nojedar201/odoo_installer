@@ -8,8 +8,8 @@ services:
     env_file:
       - .docker/db-creation.env
     environment:
-      POSTGRES_DB: odoo
-      POSTGRES_USER: odoo
+      POSTGRES_DB: {{ project_name }}
+      POSTGRES_USER: {{ pg_user }}
       {{ pg_tune_conf }}
 
     volumes:
