@@ -4,11 +4,16 @@ services:
   odoo:
     image: {{ image_url }}
     restart: unless-stopped
+    {% if open_odoo_ports -%}
+    ports:
+      - "{{ odoo_port }}:{{ odoo_port }}"
+      - "{{ odoo_port_longpolling }}:{{ odoo_port_longpolling }}"
+    {%- endif %}
     env_file:
       - .docker/odoo.env
       - .docker/db-access.env
     environment:
-      DB_FILTER: "^{{ project_name }}"
+      DB_FILTER: "{{ odoo_dbfilter }}"
       DOODBA_ENVIRONMENT: "${DOODBA_ENVIRONMENT-prod}"
       INITIAL_LANG: "{{ odoo_initial_lang }}"
       LETSENCRYPT_HOST: {{ domain }}
@@ -31,7 +36,7 @@ services:
       - .docker/odoo.env
       - .docker/db-access.env
     environment:
-      DB_FILTER: "^{{ project_name }}"
+      DB_FILTER: "{{ odoo_dbfilter }}"
       DOODBA_ENVIRONMENT: "${DOODBA_ENVIRONMENT-prod}"
       INITIAL_LANG: "{{ odoo_initial_lang }}"
       LETSENCRYPT_HOST: {{ domain }}

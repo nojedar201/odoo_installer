@@ -101,6 +101,11 @@ odoo_listdb:
     type: bool
     help: Odoo List DataBase?
 
+odoo_dbfilter:
+    type: str
+    default: "^{{ project_name }}$$"
+    help: Filtro de BD de Odoo(dbfilter)
+
 odoo_proxy_mode:
     default: true
     type: bool
@@ -115,6 +120,11 @@ odoo_port_longpolling:
     default: 8072
     type: int
     help: Cual es el Puerto a usar para Longpolling?
+
+open_odoo_ports:
+    default: false
+    type: bool
+    help: Abrir puertos de Odoo?
 
 max_cron_threads:
     default: 2
