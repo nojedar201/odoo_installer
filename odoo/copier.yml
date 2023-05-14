@@ -23,7 +23,7 @@ domain:
 
 image_url:
     type: str
-    default: "registry.gitlab.com/loo-erp/odoo:12.0-latest"
+    default: "ghcr.io/odoo-ec/doodba_odoo15_ec:15.0-latest"
     help: Cual es la imagen a usar?
 
 tipo_servidor_postgres:
