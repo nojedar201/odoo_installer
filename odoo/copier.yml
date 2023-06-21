@@ -151,6 +151,11 @@ limit_memory_soft:
     type: int
     help: Cantidad de Memoria RAM Disponible en Bytes(SOFT)?
 
+odoo_db_maxconn:
+    default: 100
+    type: int
+    help: Conexines Maximas a la  Base de datos desde Odoo?
+
 server_wide_modules:
     default: base,web
     type: str
