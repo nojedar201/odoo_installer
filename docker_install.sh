@@ -28,6 +28,7 @@ sudo -H pip3 install virtualenv
 virtualenv venv -p /usr/bin/python3
 source venv/bin/activate
 pip3 install copier invoke pre-commit docker==6.0.0
+pip3 install requests==2.28.1
 
 sudo groupadd -f docker
 sudo usermod -aG docker $USER
