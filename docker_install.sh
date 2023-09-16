@@ -27,7 +27,7 @@ sudo apt-get install git python3-pip build-essential wget python3-setuptools -y
 sudo -H pip3 install virtualenv
 virtualenv venv -p /usr/bin/python3
 source venv/bin/activate
-pip3 install copier invoke pre-commit docker==6.0.0
+pip3 install copier==8.1.0 invoke pre-commit docker==6.0.0
 pip3 install requests==2.28.1
 
 sudo groupadd -f docker
